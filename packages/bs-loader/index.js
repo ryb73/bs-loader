@@ -58,6 +58,7 @@ module.exports = function loader() {
   const callback = this.async()
   const showWarnings =
     options.showWarnings !== undefined ? options.showWarnings : true
+  const excludedWarnings = options.excludedWarnings || []
 
   this.addContextDependency(this.context)
 
@@ -81,7 +82,12 @@ module.exports = function loader() {
     .then(({ src, warnings, errors }) => {
       if (showWarnings) {
         warnings.forEach(message => {
-          this.emitWarning(new Error(message))
+          let filteredMessage = excludedWarnings.reduce((message, filter) => {
+            return message.replace(filter, "")
+          }, message)
+
+          if(filteredMessage)
+            this.emitWarning(new Error(filteredMessage))
         })
       }
 
